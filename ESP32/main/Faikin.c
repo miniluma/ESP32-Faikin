@@ -2931,6 +2931,7 @@ app_main ()
             set_val (control, 1);
             samplestart ();
 
+
             // Switch modes (heating or cooling) depending on currently measured 
             //  temperature related to min/max
             if (!lockmode && !isFTXM) // TODO: Temporary ignore for FTXM
@@ -2944,6 +2945,16 @@ app_main ()
                   hot = 1;
                   daikin_set_e (mode, "H");     // Set heating as under temp
                }
+            }
+            else if(isFTXM)
+            {
+               // FTXM Mode only on heat
+               hot = 1;
+               daikin_set_e (mode, "H");     // Set heating
+            }
+            else
+            {
+               // No action
             }
 
             // Force high fan at the beginning if not fan in AUTO 
