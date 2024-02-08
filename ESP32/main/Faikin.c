@@ -3250,14 +3250,14 @@ app_main ()
                      }
                      else
                      {
-                        // Heatback. Do nothing. 
+                        // Heatback. Do nothing.  See STATE Heatback
                      }
                   }
                   // STATE Heatback
                   else
                   {
                      daikin.hysteresis = 0;
-                     set = 16;
+                     set = 16; // Set to 16°C hard to make sure the unit stops heating.
                   }
                }
                else

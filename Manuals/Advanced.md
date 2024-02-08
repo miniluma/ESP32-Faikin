@@ -131,3 +131,13 @@ The goal of this faikin control logic is to slowly heat up the room and maintain
 - Currently, no fan speed adaption. Please select a suitable fan speed for your room
 - Reduce Demand Control to the lowest possible value and increase it in small steps, if your room is not getting warm enough after a while.
 - Auto Demand Control for Single Split maybe comes later. 
+
+### Todo
+
+- Real world Testing
+  - General behavior
+  - Reaching and holding temperature (probably needs a factor / additional value besides heatover where deltat=3.5 is too low to hold the room temperature)
+  - Effects from temperature prediction (probably needs a factor due to slow temperature movement)
+- Bring back automatic fan speed adaption (incl. quite mode as lowest fan step)
+- Consider multi split behavior (3MX, 4MX, 5MX outdoor units need more than 1 insoor unit active)
+- Automatic Demand Control for betten efficiency and comfort
