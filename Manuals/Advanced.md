@@ -120,7 +120,7 @@ Heating up very cold rooms may take a while.
 The FTXM Perfera wall mounted units run in an efficient state, if the measured room temperature or inlet temperature (measured by the unit itself) and the unit target temperature are between 2 and 3.5 (with romm temp > target temp). If the difference is >= 4, the units deactivate the heating (fan stops).
 The goal of this faikin control logic is to slowly heat up the room and maintain the desired room temperature at a delta temperature of 3.5. This leads to lower liquid temperatures, lower power consumption and more efficiency.
 
-### Limitations (at the moment)
+### FTXM Limitations (at the moment)
 
 - This mode only works in heating and with auto mode active (properly set `autot` and `autor`).
 - It ignores 
@@ -132,7 +132,7 @@ The goal of this faikin control logic is to slowly heat up the room and maintain
 - Reduce Demand Control to the lowest possible value and increase it in small steps, if your room is not getting warm enough after a while.
 - Auto Demand Control for Single Split maybe comes later. 
 
-### Todo
+### FTXM Todo
 
 - Real world Testing
   - General behavior
