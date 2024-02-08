@@ -3196,7 +3196,7 @@ app_main ()
                         set = max + reference - measured_temp + coolback;  // Cooling mode but apply positive offset to not actually cool any more than this
                   }
                }
-               else if(hot)// isFTXM - Control logic for FTXM Perfera wall mounted units // TODO: Currently for heating mode only
+               else // isFTXM - Control logic for FTXM Perfera wall mounted units // TODO: Currently for heating mode only
                {
                   // Concept:
                   //  If the room is too cold, we try to boost temp until we reach the desired range
@@ -3270,10 +3270,6 @@ app_main ()
                      daikin.hysteresis = 0;
                      set = 16; // Set to 16°C hard to make sure the unit stops heating.
                   }
-               }
-               else
-               {
-                  // No action
                }
 
                // Limit settings to acceptable values
