@@ -3187,23 +3187,77 @@ app_main ()
                }
                else if(hot)// isFTXM - Control logic for FTXM Perfera wall mounted units // TODO: Currently for heating mode only
                {
-                  // STATE below min
+                  // Concept:
+                  //  If the room is too cold, we try to boost temp until we reach the desired range
+                  //  In the desired range, we try to maintain the temp around the desired temperature.
+                  //  If the room is getting too hot (>max), the A/C provides too much heat for the room even when in lowest possible mode, so we have to cool down a bit.
+                  // --
+                  // Basics:
+                  //  Perfera units react to deltaT = inlet-target temperatures.
+                  //  They have good heating at deltaT = 2 (e.g. Target = 20, inlet = 22)
+                  //  They turn off at deltaT >= 4 (e.g. Target = 20, inlet = 24)
+                  //  The goal is to reach the desired room temp and try to maintain the room temp at deltat = 3.5 (to avoid turn off)
+                  //  If the room still heats, the AC is too strong (or outdoor temp is too high etc.)
+                  //  If the room is getting colder, it needs more power.
+
+                  // STATE below min -> Start heating and overshoot to come to range
                   if(measured_temp < min)
                   {
                      daikin.hysteresis = 1;
+                     set = reference - 2 + heatover;
                   }
                   // STATE in Range 
                   else if(measured_temp >= min && measured_temp < max)
                   {
                      if(1 == daikin.hysteresis) // heating
                      {
-
+                        // Between min and desired temp, we slowly reduce the target temperature
+                        // e.g. 
+                        // autot = 21, autor = 0.5 -> Range 20.5 - 21.5
+                        // offset at lower range = 2
+                        // offset at desired temp = 3.5
+                        // offset diff = 2-3.5 = 1.5
+                        // Ex1:
+                        //  measured = 20.5
+                        //  measured - min = 0
+                        //  offset perc = 0/0.5 = 0
+                        //  new offset = 1.5 * 0 = 0
+                        // Ex2:
+                        //  measured = 20.7
+                        //  measured - min = 0.2
+                        //  offset perc = 0.2/0.5 = 0.4
+                        //  new offset = 1.5 * 0.4 = 0.6 -> 0.5
+                        // Ex3:
+                        //  measured = 20.9
+                        //  measured - min = 0.4
+                        //  offset perc = 0.4/0.5 = 0.8
+                        //  new offset = 1.5 * 0.8 = 1.2 -> 1
+                        // Ex4:
+                        //  measured = 21
+                        //  measured - min = 0.5
+                        //  offset perc = 0.5/0.5 = 1
+                        //  new offset = 1.5 * 1 = 1.5 -> 1.5
+                        float offset = 0;
+                        if(measured_temp < autot) // between min and desired temp
+                        {
+                           offset = 2 - roundf((measured_temp-min)/autot);
+                        }
+                        else // above desired temp
+                        {
+                           offset = 3.5;
+                        }
+                        set = reference - offset;
+                     }
+                     else
+                     {
+                        // Heatback. Do nothing. 
                      }
                   }
                   // STATE Heatback
                   else
                   {
                      daikin.hysteresis = 0;
+                     set = 16;
                   }
                }
                else
