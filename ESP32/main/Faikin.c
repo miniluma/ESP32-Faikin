@@ -3097,7 +3097,7 @@ app_main ()
                   }
                   // Daikin is off
                   // TODO: What's the purpose of daikin.remote?
-                  else if ((autop || (daikin.remote && autoptemp))      // AutoP Mode only
+                  else if ((autop || (daikin.remote && autoptemp) && !isFTXM)      // AutoP Mode only // TODO: Temporary ignore for FTXM
                            && (daikin.countApproaching == daikin.countTotal || daikin.countBeyond == daikin.countTotal) // full cycle approaching or full cycle beyond
                            && (measured_temp >= max + (float) autoptemp / autoptemp_scale       // temp out of desired range
                                || measured_temp <= min - (float) autoptemp / autoptemp_scale) && (!lockmode || countBeyond2Samples != count_total_2_samples))   // temp out of desired range
@@ -3159,28 +3159,56 @@ app_main ()
 
                // Temp set
                float set = min + reference - measured_temp;     // Where we will set the temperature << WHY? IT WILL BE OVERWRITTEN 
-               if ((hot && measured_temp < (daikin.hysteresis ? max : min))
-                   || (!hot && measured_temp > (daikin.hysteresis ? min : max)))
-               {                // Apply heat/cool
-                  if (thermostat)
-                     daikin.hysteresis = 1;     // We're on, so keep going to "beyond"
-                  if (hot)
-                     set = max + reference - measured_temp + heatover;  // Ensure heating by applying A/C offset to force it
-                  else
-                     set = min + reference - measured_temp - coolover;  // Ensure cooling by applying A/C offset to force it
-               } else
-               {                // At or beyond temp - stop heat/cool
-                  daikin.hysteresis = 0;        // We're off, so keep falling back until "approaching" (default when thermostat not set)
-                  if (daikin.fansaved)
-                  {
-                     daikin_set_v (fan, daikin.fansaved);       // revert fan speed
-                     daikin.fansaved = 0;
-                     samplestart ();    // Initial phase complete, start samples again.
+               if(!isFTXM) // Control for non-FTXM units
+               {
+                  if ((hot && measured_temp < (daikin.hysteresis ? max : min))
+                     || (!hot && measured_temp > (daikin.hysteresis ? min : max)))
+                  {                // Apply heat/cool
+                     if (thermostat)
+                        daikin.hysteresis = 1;     // We're on, so keep going to "beyond"
+                     if (hot)
+                        set = max + reference - measured_temp + heatover;  // Ensure heating by applying A/C offset to force it
+                     else
+                        set = min + reference - measured_temp - coolover;  // Ensure cooling by applying A/C offset to force it
+                  } else
+                  {                // At or beyond temp - stop heat/cool
+                     daikin.hysteresis = 0;        // We're off, so keep falling back until "approaching" (default when thermostat not set)
+                     if (daikin.fansaved)
+                     {
+                        daikin_set_v (fan, daikin.fansaved);       // revert fan speed
+                        daikin.fansaved = 0;
+                        samplestart ();    // Initial phase complete, start samples again.
+                     }
+                     if (hot)
+                        set = min + reference - measured_temp - heatback;  // Heating mode but apply negative offset to not actually heat any more than this
+                     else
+                        set = max + reference - measured_temp + coolback;  // Cooling mode but apply positive offset to not actually cool any more than this
                   }
-                  if (hot)
-                     set = min + reference - measured_temp - heatback;  // Heating mode but apply negative offset to not actually heat any more than this
+               }
+               else if(hot)// isFTXM - Control logic for FTXM Perfera wall mounted units // TODO: Currently for heating mode only
+               {
+                  // STATE below min
+                  if(measured_temp < min)
+                  {
+                     daikin.hysteresis = 1;
+                  }
+                  // STATE in Range 
+                  else if(measured_temp >= min && measured_temp < max)
+                  {
+                     if(1 == daikin.hysteresis) // heating
+                     {
+
+                     }
+                  }
+                  // STATE Heatback
                   else
-                     set = max + reference - measured_temp + coolback;  // Cooling mode but apply positive offset to not actually cool any more than this
+                  {
+                     daikin.hysteresis = 0;
+                  }
+               }
+               else
+               {
+                  // No action
                }
 
                // Limit settings to acceptable values
