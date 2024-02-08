@@ -44,7 +44,7 @@ Some more advances settings which you are unlikely to need to ever change.
 |-------|-------|
 |`debug`|`true` means output lots of debug - notable for S21 this is one line with a set of poll responses. This also causes more fields to be polled than normal, so slower response times.|
 |`dump`|`true` means output raw serial communications|
-|`isFTXM`| EXPERIMENTAL! 0 or 1 - Enable special control logic for FTXM Perfera wall mounted units. It ignores switchtemp, pushtemp, heatback. Set autor to low values (0.2-0.5). Currently, no fan speed adaption. Please select a suitable fan speed for your room. Reduce Demand Control to the lowest possible value and increase it in small steps, if your room is not getting warm enough after a while. Auto Demand Control for Single Split maybe comes later. Target of this option is to maintain a long running mode with highest energy efficiency and low or no on/off cycles. Heating up very cold rooms may take a while.
+|`isFTXM`| EXPERIMENTAL! 0 or 1 - Enable special control logic for FTXM Perfera wall mounted units. (see below) |
 
 |`uart`|Which internal UART to use|
 |`tx`|Which GPIO for tx, prefix `-` to invert the port|
@@ -108,3 +108,26 @@ The controls are things you can change. These can be sent in a JSON payload in a
 |`autob`|The name of the BLE device. This sets the `autob` setting|
 |`auto0`|Time to turn off HH:MM, `00:00` is don't turn off. This sets the `auto0` setting|
 |`auto1`|Time to turn off HH:MM, `00:00` is don't turn on. This sets the `auto1` setting|
+
+## FTXM Mode (Experimental)
+
+The FTXM Control Mode can be enabled via `isFTXM` setting.
+It is made for FTXM Perfera wall mounted units only!
+This is experimental and still under development, so no your room may not have a good temperature!
+
+Target of this option is to maintain a long running mode with highest energy efficiency and low or no on/off cycles.
+Heating up very cold rooms may take a while.
+The FTXM Perfera wall mounted units run in an efficient state, if the measured room temperature or inlet temperature (measured by the unit itself) and the unit target temperature are between 2 and 3.5 (with romm temp > target temp). If the difference is >= 4, the units deactivate the heating (fan stops).
+The goal of this faikin control logic is to slowly heat up the room and maintain the desired room temperature at a delta temperature of 3.5. This leads to lower liquid temperatures, lower power consumption and more efficiency.
+
+### Limitations (at the moment)
+
+- This mode only works in heating and with auto mode active (properly set `autot` and `autor`).
+- It ignores 
+  - switchtemp
+  - pushtemp
+  - heatback
+- Set autor to low values (0.2-0.5)
+- Currently, no fan speed adaption. Please select a suitable fan speed for your room
+- Reduce Demand Control to the lowest possible value and increase it in small steps, if your room is not getting warm enough after a while.
+- Auto Demand Control for Single Split maybe comes later. 
