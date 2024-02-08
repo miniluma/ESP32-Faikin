@@ -44,6 +44,7 @@ Some more advances settings which you are unlikely to need to ever change.
 |-------|-------|
 |`debug`|`true` means output lots of debug - notable for S21 this is one line with a set of poll responses. This also causes more fields to be polled than normal, so slower response times.|
 |`dump`|`true` means output raw serial communications|
+|`isFTXM`| EXPERIMENTAL! 0 or 1 - Enable special control logic for FTXM Perfera wall mounted units. It ignores switchtemp, pushtemp, heatback. Set autor to low values (0.2-0.5). Currently, no fan speed adaption. Please select a suitable fan speed for your room. Reduce Demand Control to the lowest possible value and increase it in small steps, if your room is not getting warm enough after a while. Auto Demand Control for Single Split maybe comes later. Target of this option is to maintain a long running mode with highest energy efficiency and low or no on/off cycles. Heating up very cold rooms may take a while.
 
 |`uart`|Which internal UART to use|
 |`tx`|Which GPIO for tx, prefix `-` to invert the port|

@@ -2904,7 +2904,7 @@ app_main ()
 
          // Apply adjustment
          // TODO: Why not minTarget and maxTarget (or OffsetHigh and OffsetLow) as setting instead of autor, switchtemp and pushtemp? 
-         if (daikin.control && daikin.power && !isnan (min) && !isnan (max))
+         if (daikin.control && daikin.power && !isnan (min) && !isnan (max) && !isFTXM) // TODO: Temporary ignore for FTXM
          {
             if (hot)
             {
@@ -2933,7 +2933,7 @@ app_main ()
 
             // Switch modes (heating or cooling) depending on currently measured 
             //  temperature related to min/max
-            if (!lockmode)
+            if (!lockmode && !isFTXM) // TODO: Temporary ignore for FTXM
             {
                if (hot && measured_temp > max)
                {
@@ -2949,7 +2949,7 @@ app_main ()
             // Force high fan at the beginning if not fan in AUTO 
             //  and temperatur not close to target temp
             // TODO: Use of switchtemp for different purposes is confusing (ref. min/max a couple of lines above)
-            if (daikin.fan
+            if (daikin.fan && !isFTXM // TODO: Temporary ignore for FTXM
                 && ((hot && measured_temp < min - 2 * (float) switchtemp / switchtemp_scale)
                     || (!hot && measured_temp > max + 2 * (float) switchtemp / switchtemp_scale)))
             {
@@ -3044,7 +3044,7 @@ app_main ()
 
                if (daikin.countTotalPrev)       // Skip first cycle
                {                // Power, mode, fan, automation
-                  if (daikin.power)     // Daikin is on
+                  if (daikin.power && !isFTXM)     // Daikin is on // TODO: Temporary ignore for FTXM
                   {
                      int step = (fanstep ? : (proto_type () == PROTO_TYPE_S21) ? 1 : 2);        // TODO: What does "fanstep ? : (pro..."? What if fanstep==0?
 
@@ -3053,7 +3053,7 @@ app_main ()
                      // TODO: Smells like too much overshoot...
                      if ((countBeyond2Samples * 2 > count_total_2_samples || daikin.slave) && !count_approaching_2_samples)
                      {          // Mode switch
-                        if (!lockmode)
+                        if (!lockmode && !isFTXM) // TODO: Temporary ignore for FTXM
                         {
                            jo_string (j, "set-mode", hot ? "C" : "H");
                            daikin_set_e (mode, hot ? "C" : "H");        // Swap mode
