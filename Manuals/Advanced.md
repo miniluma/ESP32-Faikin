@@ -109,11 +109,11 @@ The controls are things you can change. These can be sent in a JSON payload in a
 |`auto0`|Time to turn off HH:MM, `00:00` is don't turn off. This sets the `auto0` setting|
 |`auto1`|Time to turn off HH:MM, `00:00` is don't turn on. This sets the `auto1` setting|
 
-## FTXM Mode (Experimental)
+## FTXM Mode (Experimental, untested!)
 
 The FTXM Control Mode can be enabled via `isFTXM` setting.
 It is made for FTXM Perfera wall mounted units only!
-This is experimental and still under development, so no your room may not have a good temperature!
+This is experimental and still under development, so your room may not have a good temperature!
 
 Target of this option is to maintain a long running mode with highest energy efficiency and low or no on/off cycles.
 Heating up very cold rooms may take a while.
