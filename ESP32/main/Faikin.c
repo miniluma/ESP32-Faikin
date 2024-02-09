@@ -3227,7 +3227,7 @@ app_main ()
                         // autot = 21, autor = 0.5 -> Range 20.5 - 21.5
                         // offset at lower range = 2
                         // offset at desired temp = 3.5
-                        // offset diff = 2-3.5 = 1.5
+                        // offset diff = 3.5-2= 1.5
                         // Ex1:
                         //  measured = 20.5
                         //  measured - min = 0
@@ -3251,7 +3251,7 @@ app_main ()
                         float offset = 0;
                         if(measured_temp < autot) // between min and desired temp
                         {
-                           offset = 2 - roundf((1.5*(measured_temp-min)/autot)/5)*5;
+                           offset = 2 + roundf((1.5*(measured_temp-min)/autot)/5)*5;
                         }
                         else // above desired temp
                         {
