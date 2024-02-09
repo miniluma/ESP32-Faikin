@@ -3251,7 +3251,7 @@ app_main ()
                         float offset = 0;
                         if(measured_temp < autot) // between min and desired temp
                         {
-                           offset = 2 - roundf((measured_temp-min)/autot);
+                           offset = 2 - roundf(1.5*(measured_temp-min)/autot);
                         }
                         else // above desired temp
                         {
