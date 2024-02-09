@@ -8,6 +8,7 @@ bit	web.control	1							// Web based controls
 bit	web.settings	1							// Web based settings
 
 s	model									// Set model name manually
+s	region		eu							// Region (legacy URLs)
 
 bit	fahrenheit			.live=1					// Web shows Fahrenheit
 
@@ -63,10 +64,10 @@ u32	tsample		900							// Sample period for making adjustments
 u32	tcontrol	600							// Control messages timeout
 
 #ifdef  CONFIG_IDF_TARGET_ESP32S3
-gpio	tx	-48								// Tx GPIO
-gpio	rx	-34								// Rx GPIO
+gpio	tx	-48								// Tx
+gpio	rx	-34								// Rx
 #else
-gpio	tx	-26								// Tx GPIO
-gpio	rx	-27								// Rx GPIO
+gpio	tx	-26								// Tx
+gpio	rx	-27								// Rx
 #endif
 

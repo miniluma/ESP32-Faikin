@@ -372,9 +372,9 @@ daikin_s21_response (uint8_t cmd, uint8_t cmd2, int len, uint8_t * payload)
                set_temp (temp, daikin.temp);    // Does not have temp in other modes
             if (payload[3] != 'A')      // Set fan speed
                set_val (fan, "00012345"[payload[3] & 0x7] - '0');       // XXX12345 mapped to A12345Q
-            else if (daikin.fan == 6)
-               set_val (fan, 6);        // Quiet mode set (it returns as auto, so we assume it set to quiet if not powered on)
-            else if (!daikin.power || !daikin.fan || daikin.fanrpm >= 750)
+            else if (daikin.fan == 6 && daikin.power && daikin.fanrpm < 750)
+               set_val (fan, 6);        // Quiet mode set (it returns as auto, so we assume it should be quiet if fan speed is low)
+            else
                set_val (fan, 0);        // Auto as fan too fast to be quiet mode
          }
          break;
@@ -1742,7 +1742,7 @@ static jo_t
 legacy_ok (void)
 {
    jo_t j = jo_object_alloc ();
-   jo_string (j, "ret", "ok");
+   jo_string (j, "ret", "OK");
    return j;
 }
 
@@ -1838,15 +1838,35 @@ legacy_web_set_demand_control (httpd_req_t * req)
 static esp_err_t
 legacy_web_get_basic_info (httpd_req_t * req)
 {
-   // Full string from my BRP module:
-   // ret=OK,type=aircon,reg=eu,dst=0,ver=3_3_9,pow=0,err=0,location=0,name=%4c%69%76%69%6e%67%20%72%6f%6f%6d,
-   // icon=2,method=home only,port=30050,id=,pw=,lpw_flag=0,adp_kind=2,pv=2,cpv=2,cpv_minor=00,led=1,en_setzone=1,
-   // mac=<my_mac>,adp_mode=run,en_hol=0,ssid1=<my_ssid>,radio1=-60,grp_name=,en_grp=0
+   time_t now = time (0);
+   struct tm tm;
+   localtime_r (&now, &tm);
    jo_t j = legacy_ok ();
    jo_string (j, "type", "aircon");
-   jo_string (j, "reg", "eu");
+   jo_string (j, "reg", region);
+   jo_int (j, "dst", tm.tm_isdst);      // Guess
+   jo_string (j, "ver", revk_version);
+   jo_string (j, "rev", revk_version);
+   jo_int (j, "pow", daikin.power);
+   jo_int (j, "err", 1 - daikin.online);
+   jo_int (j, "location", 0);
+   jo_string (j, "name", hostname);
+   jo_int (j, "icon", 1);
+   jo_string (j, "method", "none");     // ??
+   jo_int (j, "port", 0);       // ??
+   jo_string (j, "id", revk_id);
+   jo_string (j, "pw", "");
+   jo_int (j, "lpw_flag", 0);
+   jo_int (j, "adp_kind", 0);   // ??
+   jo_int (j, "pv", 0);         // ?? versions?
+   jo_int (j, "cpv", 0);        //
+   jo_int (j, "cpv_minor", 0);  //
+   jo_int (j, "led", daikin.led);
+   jo_int (j, "en_setzone", 0); // ??
    jo_string (j, "mac", revk_id);
    jo_string (j, "ssid", revk_wifi ());
+   jo_string (j, "grp_name", "");
+   jo_int (j, "en_grp", 0);     //??
    return legacy_send (req, &j);
 }
 
@@ -2015,11 +2035,11 @@ legacy_web_register_terminal (httpd_req_t * req)
 static esp_err_t
 legacy_web_get_year_power (httpd_req_t * req)
 {
-   // ret=OK,curr_year_heat=0/0/0/0/0/0/0/0/0/0/0/0,prev_year_heat=0/0/0/0/0/0/0/0/0/0/0/0,curr_year_cool=0/0/0/0/0/0/0/0/0/0/0/0,prev_year_cool=0/0/0/0/0/0/0/0/0/0/0/0
-   // Have no idea how to implement it, perhaps the original module keeps some internal statistics.
-   // For now let's just prevent errors in OpenHAB and return an empty OK response
-   // Note all zeroes from my BRP
    jo_t j = legacy_ok ();
+   jo_string (j, "curr_year_heat", "0/0/0/0/0/0/0/0/0/0/0/0");
+   jo_string (j, "prev_year_heat", "0/0/0/0/0/0/0/0/0/0/0/0");
+   jo_string (j, "curr_year_cool", "0/0/0/0/0/0/0/0/0/0/0/0");
+   jo_string (j, "prevr_year_cool", "0/0/0/0/0/0/0/0/0/0/0/0");
    return legacy_send (req, &j);
 }
 
@@ -2251,7 +2271,9 @@ send_ha_config (void)
       {
          jo_t j = make ("demand", NULL);
          jo_string (j, "name", "Demand control");
-         jo_stringf (j, "command_topic", "%s/demand", revk_id);
+         jo_stringf (j, "cmd_t", "%s/demand", revk_id);
+         jo_stringf (j, "stat_t", "%s", revk_id);
+         jo_string (j, "val_tpl", "{{value_json.demand}}");
          jo_array (j, "options");
          for (int i = 30; i <= 100; i += 5)
             jo_stringf (j, NULL, "%d", i);
